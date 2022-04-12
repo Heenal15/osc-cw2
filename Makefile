@@ -185,6 +185,8 @@ UPROGS := \
 	_ln\
 	_ls\
 	_mkdir\
+	_protection_test\
+		_testnull\
 	_rm\
 	_sh\
 	_stressfs\

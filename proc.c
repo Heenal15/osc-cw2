@@ -7,6 +7,8 @@
 #include "proc.h"
 #include "spinlock.h"
 
+// mprotect and munprotect functions reference: https://github.com/clue1ess/xv6/blob/master/proc.c
+
 struct {
   struct spinlock lock;
   struct proc proc[NPROC];
@@ -181,6 +183,7 @@ growproc(int n)
 int
 fork(void)
 {
+  
   int i, pid;
   struct proc *np;
   struct proc *curproc = myproc();
@@ -534,3 +537,124 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+int
+mprotect(void *addr, int len) 
+{
+  struct proc *curproc = myproc();
+  pte_t *pgtab, *pte = 0;
+  pde_t *pde;
+  char *vaddr;
+  int i;
+
+  if(len <= 0){
+    cprintf("\nwrong len\n");
+    return -1;
+  }
+
+  if((int)(((int) addr) % PGSIZE )  != 0){
+    cprintf("\nwrong addr\n");
+    return -1;
+  }
+
+  i = 0;
+	while (i < len) {
+		vaddr =(char*)((uint)addr + i*PGSIZE);
+		pde = &curproc->pgdir[PDX((void *)vaddr)];
+
+		if(pde == 0){
+		  return -1;
+    }
+
+		if(*pde & PTE_P && *pde & PTE_U) {
+			pgtab = (pte_t*)P2V(PTE_ADDR(*pde));
+
+			if(pgtab == 0){
+				return -1;
+      }
+
+			pte = &pgtab[PTX(vaddr)];
+			if(pte == 0){
+				return -1;
+      }
+
+			if(*pte & PTE_P) {
+				*pte = *pte & ~PTE_W;
+			}
+			else{
+				return -1;
+      }
+		}
+		else{
+			return -1;
+    }
+
+    i++;
+	}
+	lcr3(V2P(curproc->pgdir));
+	return 0;
+}
+
+int
+munprotect(void *addr, int len)
+{
+  
+  struct proc *curproc = myproc();
+  pte_t *pgtab, *pte;
+  pde_t *pde;
+  char *vaddr;
+  int i;
+
+  //Case 1 - if addr is not page aligned
+  if((int)(((int) addr) % PGSIZE )  != 0){
+    cprintf("\nwrong addr\n");
+    return -1;
+  }
+
+  //Case 2 - len is less than or equal to zero
+  if(len <= 0){
+    cprintf("\nwrong len\n");
+    return -1;
+  }
+
+  // 
+  i = 0;
+  while(i < len) {
+    vaddr = (char *)(((uint)addr) + i*PGSIZE);
+    pde = &curproc->pgdir[PDX(vaddr)];
+
+		if(pde == 0)
+			return -1;
+
+    if(*pde & PTE_P && *pde & PTE_U) {
+
+      pgtab = (pte_t*)P2V(PTE_ADDR(*pde));
+
+			if(pgtab == 0){
+				return -1;
+      }
+
+      pte = &pgtab[PTX(vaddr)];
+
+			if(pte == 0){
+				return -1;
+      }
+
+      if(*pte & PTE_P) {
+        *pte = *pte | PTE_W; //Setting the write bit 
+      }
+      else{
+        return -1;
+      }
+    }
+    else{
+      return -1;
+    }
+    i++;
+  }
+  
+  //Updating the CR3 register with the address of page directory
+  lcr3(V2P(curproc->pgdir));
+  return 0; //Success!
+}
+
