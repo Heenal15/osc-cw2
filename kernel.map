@@ -290,7 +290,7 @@ Linker script and memory map
                 0x00000000801035b0                pipewrite
                 0x00000000801036b0                piperead
  *fill*         0x000000008010379b        0x5 
- .text          0x00000000801037a0      0xcfb proc.o
+ .text          0x00000000801037a0      0xcf3 proc.o
                 0x0000000080103870                forkret
                 0x00000000801038c0                pinit
                 0x00000000801038e0                mycpu
@@ -310,7 +310,7 @@ Linker script and memory map
                 0x00000000801041f0                procdump
                 0x00000000801042c0                mprotect
                 0x00000000801043b0                munprotect
- *fill*         0x000000008010449b        0x5 
+ *fill*         0x0000000080104493        0xd 
  .text          0x00000000801044a0      0x135 sleeplock.o
                 0x00000000801044a0                initsleeplock
                 0x00000000801044e0                acquiresleep
@@ -918,7 +918,7 @@ LOAD initcode
 LOAD entryother
 OUTPUT(kernel elf32-i386)
 
-.debug_line     0x0000000000000000     0x6f55
+.debug_line     0x0000000000000000     0x6f14
  .debug_line    0x0000000000000000       0x41 entry.o
  .debug_line    0x0000000000000041      0x286 bio.o
  .debug_line    0x00000000000002c7      0x8fd console.o
@@ -935,19 +935,19 @@ OUTPUT(kernel elf32-i386)
  .debug_line    0x00000000000035bc      0x2c8 mp.o
  .debug_line    0x0000000000003884       0x72 picirq.o
  .debug_line    0x00000000000038f6      0x36d pipe.o
- .debug_line    0x0000000000003c63      0xd0d proc.o
- .debug_line    0x0000000000004970      0x164 sleeplock.o
- .debug_line    0x0000000000004ad4      0x387 spinlock.o
- .debug_line    0x0000000000004e5b      0x2cc string.o
- .debug_line    0x0000000000005127       0x43 swtch.o
- .debug_line    0x000000000000516a      0x249 syscall.o
- .debug_line    0x00000000000053b3      0x8f2 sysfile.o
- .debug_line    0x0000000000005ca5      0x207 sysproc.o
- .debug_line    0x0000000000005eac       0x48 trapasm.o
- .debug_line    0x0000000000005ef4      0x2c3 trap.o
- .debug_line    0x00000000000061b7      0x290 uart.o
- .debug_line    0x0000000000006447      0x32f vectors.o
- .debug_line    0x0000000000006776      0x7df vm.o
+ .debug_line    0x0000000000003c63      0xccc proc.o
+ .debug_line    0x000000000000492f      0x164 sleeplock.o
+ .debug_line    0x0000000000004a93      0x387 spinlock.o
+ .debug_line    0x0000000000004e1a      0x2cc string.o
+ .debug_line    0x00000000000050e6       0x43 swtch.o
+ .debug_line    0x0000000000005129      0x249 syscall.o
+ .debug_line    0x0000000000005372      0x8f2 sysfile.o
+ .debug_line    0x0000000000005c64      0x207 sysproc.o
+ .debug_line    0x0000000000005e6b       0x48 trapasm.o
+ .debug_line    0x0000000000005eb3      0x2c3 trap.o
+ .debug_line    0x0000000000006176      0x290 uart.o
+ .debug_line    0x0000000000006406      0x32f vectors.o
+ .debug_line    0x0000000000006735      0x7df vm.o
 
 .debug_info     0x0000000000000000    0x12608
  .debug_info    0x0000000000000000       0x26 entry.o
@@ -1130,7 +1130,7 @@ OUTPUT(kernel elf32-i386)
  .debug_str     0x0000000000000e6f       0x62 vm.o
                                         0x462 (size before relaxing)
 
-.debug_loc      0x0000000000000000     0x6c0f
+.debug_loc      0x0000000000000000     0x6b4b
  .debug_loc     0x0000000000000000      0x126 bio.o
  .debug_loc     0x0000000000000126      0xaf9 console.o
  .debug_loc     0x0000000000000c1f      0x338 exec.o
@@ -1146,16 +1146,16 @@ OUTPUT(kernel elf32-i386)
  .debug_loc     0x0000000000003858      0x4ab mp.o
  .debug_loc     0x0000000000003d03       0x5c picirq.o
  .debug_loc     0x0000000000003d5f       0xb5 pipe.o
- .debug_loc     0x0000000000003e14      0xafd proc.o
- .debug_loc     0x0000000000004911       0x4e sleeplock.o
- .debug_loc     0x000000000000495f      0x237 spinlock.o
- .debug_loc     0x0000000000004b96      0x6b5 string.o
- .debug_loc     0x000000000000524b      0x145 syscall.o
- .debug_loc     0x0000000000005390      0x736 sysfile.o
- .debug_loc     0x0000000000005ac6       0x59 sysproc.o
- .debug_loc     0x0000000000005b1f       0x7f trap.o
- .debug_loc     0x0000000000005b9e      0x344 uart.o
- .debug_loc     0x0000000000005ee2      0xd2d vm.o
+ .debug_loc     0x0000000000003e14      0xa39 proc.o
+ .debug_loc     0x000000000000484d       0x4e sleeplock.o
+ .debug_loc     0x000000000000489b      0x237 spinlock.o
+ .debug_loc     0x0000000000004ad2      0x6b5 string.o
+ .debug_loc     0x0000000000005187      0x145 syscall.o
+ .debug_loc     0x00000000000052cc      0x736 sysfile.o
+ .debug_loc     0x0000000000005a02       0x59 sysproc.o
+ .debug_loc     0x0000000000005a5b       0x7f trap.o
+ .debug_loc     0x0000000000005ada      0x344 uart.o
+ .debug_loc     0x0000000000005e1e      0xd2d vm.o
 
 .debug_ranges   0x0000000000000000      0xd48
  .debug_ranges  0x0000000000000000       0x18 bio.o

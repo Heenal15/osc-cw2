@@ -90,6 +90,9 @@ sys_uptime(void)
   return xticks;
 }
 
+// The following system call changes the protection bits of the page range starting at addr and
+// of len pages to be read only, non-writeable
+// Returns -1 if unsuccessful
 int
 sys_mprotect(void){
   int add;
@@ -97,9 +100,10 @@ sys_mprotect(void){
   if(argint(0, &add)<0 || argint(1, &len)<0)
     return -1;
   return mprotect((void *)add,len);
-
 }
 
+// The following system call sets the region back to both readable and writeable.
+//Returns -1 if unsuccessful
 int
 sys_munprotect(void){
   int add;

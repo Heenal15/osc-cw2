@@ -538,72 +538,15 @@ procdump(void)
   }
 }
 
+// The following system call changes the protection bits of the page range starting at addr and
+// of len pages to be read only, non-writeable
+// Returns 0 if successful
 int
 mprotect(void *addr, int len) 
 {
   struct proc *curproc = myproc();
   pte_t *pgtab, *pte = 0;
   pde_t *pde;
-  char *vaddr;
-  int i;
-
-  if(len <= 0){
-    cprintf("\nwrong len\n");
-    return -1;
-  }
-
-  if((int)(((int) addr) % PGSIZE )  != 0){
-    cprintf("\nwrong addr\n");
-    return -1;
-  }
-
-  i = 0;
-	while (i < len) {
-		vaddr =(char*)((uint)addr + i*PGSIZE);
-		pde = &curproc->pgdir[PDX((void *)vaddr)];
-
-		if(pde == 0){
-		  return -1;
-    }
-
-		if(*pde & PTE_P && *pde & PTE_U) {
-			pgtab = (pte_t*)P2V(PTE_ADDR(*pde));
-
-			if(pgtab == 0){
-				return -1;
-      }
-
-			pte = &pgtab[PTX(vaddr)];
-			if(pte == 0){
-				return -1;
-      }
-
-			if(*pte & PTE_P) {
-				*pte = *pte & ~PTE_W;
-			}
-			else{
-				return -1;
-      }
-		}
-		else{
-			return -1;
-    }
-
-    i++;
-	}
-	lcr3(V2P(curproc->pgdir));
-	return 0;
-}
-
-int
-munprotect(void *addr, int len)
-{
-  
-  struct proc *curproc = myproc();
-  pte_t *pgtab, *pte;
-  pde_t *pde;
-  char *vaddr;
-  int i;
 
   //Case 1 - if addr is not page aligned
   if((int)(((int) addr) % PGSIZE )  != 0){
@@ -617,30 +560,71 @@ munprotect(void *addr, int len)
     return -1;
   }
 
-  // 
+  char *vaddr;
+  int i;
+  i = 0;
+	while (i < len) {
+		vaddr =(char*)((uint)addr + i*PGSIZE);
+		pde = &curproc->pgdir[PDX((void *)vaddr)];
+
+    //Checks page table/directory entry flags.
+		if(*pde & PTE_P && *pde & PTE_U && pde != 0) {
+			pgtab = (pte_t*)P2V(PTE_ADDR(*pde));
+			pte = &pgtab[PTX(vaddr)];
+
+			if((*pte & PTE_P) && pte !=0 && pgtab != 0) {
+				*pte = *pte & ~PTE_W; //Clearing the write bit
+			}
+			else{
+				return -1;
+      }
+		}
+		else{
+			return -1;
+    }
+    i++;
+	}
+
+  //Updating the CR3 register with the address of page directory
+	lcr3(V2P(curproc->pgdir));
+	return 0;//Success!
+}
+
+// The following system call sets the region back to both readable and writeable.
+// Returns 0 if successful
+int
+munprotect(void *addr, int len)
+{
+  
+  struct proc *curproc = myproc();
+  pte_t *pgtab, *pte;
+  pde_t *pde;
+
+  //Case 1 - if addr is not page aligned
+  if((int)(((int) addr) % PGSIZE )  != 0){
+    cprintf("\nwrong addr\n");
+    return -1;
+  }
+
+  //Case 2 - len is less than or equal to zero
+  if(len <= 0){
+    cprintf("\nwrong len\n");
+    return -1;
+  }
+
+  char *vaddr;
+  int i;
   i = 0;
   while(i < len) {
     vaddr = (char *)(((uint)addr) + i*PGSIZE);
     pde = &curproc->pgdir[PDX(vaddr)];
 
-		if(pde == 0)
-			return -1;
-
-    if(*pde & PTE_P && *pde & PTE_U) {
-
+    //Checks page table/directory entry flags.
+    if(*pde & PTE_P && *pde & PTE_U && pde != 0) {
       pgtab = (pte_t*)P2V(PTE_ADDR(*pde));
+	    pte = &pgtab[PTX(vaddr)];
 
-			if(pgtab == 0){
-				return -1;
-      }
-
-      pte = &pgtab[PTX(vaddr)];
-
-			if(pte == 0){
-				return -1;
-      }
-
-      if(*pte & PTE_P) {
+		  if(*pte & PTE_P && pte != 0 && pgtab != 0) {
         *pte = *pte | PTE_W; //Setting the write bit 
       }
       else{
